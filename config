@@ -1,0 +1,229 @@
+DeskTopSize 2 3
+EdgeScroll 0 0
+*FvwmPagerBack SlateBlue
+*FvwmPagerFore black
+*FvwmPagerFont none
+*FvwmPagerHilight SlateBlue
+*FvwmPagerGeometry +1784+2
+*FvwmPagerLabel FvwmPager
+*FvwmPagerSmallFont "xft:Terminus:Regular::size=7"
+*FvwmPager: LabelsAbove
+*FvwmPager: SolidSeparators
+Style *FvwmPager Sticky, StaysOnTop
+
+Colorset 17 fg black, bg #60A0C0
+
+Style "*" IconBox 5 5 90 -0, IconGrid 1 1, IconFill Left Top
+Style * IconSize 90 70 -1 -1
+Style * IconBackgroundColorset 17
+Style * IconBackgroundRelief 2
+Style * IconBackgroundPadding 2
+Style * DecorateTransient
+
+ImagePath $HOME/.fvwm/icons:+
+
+Style "*" Icon xlogo.png
+Style rxvt Icon term.png
+Style "Psensor*" IconOverride, Icon sysmon.png
+Style leafpad IconOverride, Icon text-editor.png
+Style xcalc IconOverride, Icon calc.png
+Style audacious IconOverride, Icon audio-headphones.png
+
+WindowFont "xft:Terminus:size=12"
+IconFont "xft:Terminus:size=9"
+TitleStyle Height 25
+MenuStyle * Font "xft:Terminus:size=11"
+MenuStyle * PopupImmediately, PopdownImmediately, PopupOffset 0 100
+MenuStyle * VerticalItemSpacing 3 3, VerticalTitleSpacing 3 3
+# Comment out HighlightBack to get a simple 3D bevel for active menu items.
+MenuStyle * HilightBack DarkSlateBlue, ActiveFore White, TrianglesUseFore, TrianglesSolid
+
+HilightColor Black #C06077
+Style "*" Color Black #60A0C0
+Style "*" HilightBack LightBlue
+
+Style "*" SloppyFocus
+Style * SnapAttraction 10 Screen
+ClickTime 250
+OpaqueMoveSize -1
+Emulate Mwm
+
+# Window Placement
+Style "*" DumbPlacement
+
+# Window decorations
+Style *			Title, Handles, !MWMFunctions, NoDecorHint
+Style "FvwmPager"	NoTitle, Sticky, WindowListSkip, NoHandles, BorderWidth 7
+Style "xload"		NoTitle, Sticky, WindowListSkip, NoHandles, FPLenient, BorderWidth 7
+Style "xclock"		NoTitle, Sticky, WindowListSkip, NoHandles, BorderWidth 7
+Style gkrellm		NoTitle, Sticky, NoHandles, BorderWidth 7, NeverFocus
+Style Cell		NoTitle, NoHandles, BorderWidth 0, FPLenient
+Style "VIC-II"		NoTitle, NoHandles, BorderWidth 0, FPLenient
+Style feh		NoTitle
+
+
+# This will create the right number of window buttons and set their listeners
+Mouse 0		1       A       Menu Window-Ops2 Close
+Mouse 0		2       A       Maximize 0 100
+Mouse 0		4       A       Iconify
+
+Mouse 1		R       A       Menu RootMenu
+Mouse 3		R       A       Menu Window-Ops Nop
+Mouse 2		R       A       WindowList
+
+Mouse 3         TSIF    A       RaiseLower
+
+Mouse 0		I       A       TileIcons
+Mouse 1		T       A       Maximize-or-Move
+
+######### Init functions ########
+# Start pager and gkrellm
+AddToFunc "InitFunction" I Module FvwmPager
+AddToFunc "InitFunction" I Exec gkrellm --geometry +1791+123
+
+# Set the background
+AddToFunc "InitFunction" I Exec xsetroot -solid SteelBlue &
+
+# Touchpad-indicator can disable the touchpad when a mouse is plugged in
+AddToFunc "InitFunction" I Exec touchpad-indicator &
+
+# Pager needs to be restarted along with the WM
+AddToFunc "RestartFunction" I Module FvwmPager
+
+############################################################################
+# Window handling functions
+############################################################################
+
+# This will automatically re-tile the icons in the icon box when
+# a window is de-iconified
+# + C = click, + D = double click
+AddToFunc TileIcons
+ + C Iconify off
+ + C All (CurrentPage, Iconic) PlaceAgain Icon
+
+AddToFunc Move-or-Raise		"I" Raise
++				"M" Move
++				"D" Lower
+
+AddToFunc Move-or-Raise2        "M" Raise
++				"M" Move
++				"D" Lower
+
+AddToFunc Resize-or-Raise       "I" Raise
++                               "M" Resize
++                               "D" Lower
+
+AddToFunc Resize-or-Raise2      "M" Raise
++                               "M" Resize
++                               "D" Lower
+
+AddToFunc Iconify-and-Raise     "I" Iconify
++                               "I" Raise
+
+AddToFunc Maximize-or-Move
+ + D Maximize
+ + I Raise
+ + C Focus
+ + M Move
+
+## Paging: Windows key + arrows moves to the next desktop
+## in the desired direction
+Key Left        A       4       Scroll -100 0
+Key Right       A       4       Scroll +100  +0
+Key Up          A       4       Scroll +0 -100
+Key Down        A       4       Scroll +0 +100
+
+
+######### Menus ########
+
+#### Window op menus
+# Menu for window operations
+AddToMenu Window-Ops    "Window Ops "    Title
++                       "Move "          Move-or-Raise2
++                       "Resize "        Resize-or-Raise2
++                       "Raise "         Raise
++                       "Lower "         Lower
++                       "(De)Iconify "   Iconify
++                       "(Un)Stick "     Stick
++                       "(Un)Maximize "  Maximize
++                       ""              Nop
++                       "Delete "        Delete
++                       "Close "         Close
++                       "Destroy "       Destroy
++                       ""              Nop
++                       "Refresh Screen " Refresh
+
+# Menu for top left hand ("close") button on windows
+AddToMenu Window-Ops2   "Move"		Move
++                       "Resize"	Resize
++                       "(Un)Stick"     Stick
++                       ""              Nop
++                       "Delete"        Delete
++                       "Close"         Close
++                       "Destroy"       Destroy
+
+#### Sub-menus are defined here.
+#### These are also used in the classic fvwm root menu.
+
+## System tools menu
+AddToMenu SysMenu
++   "File Manager"        exec pcmanfm &
++   "Audio Panel"        exec pavucontrol &
++   "System Temp"        exec psensor &
++	"" 			Nop
++	"Restart WM"		Restart fvwm2
++ 	"Sleep Mode"		Popup SuspendMenu #Suspend
++ 	"Exit X"		Popup QuitMenu #Quit
+
+## Confirm quitting X11
+AddToMenu QuitMenu "Really?" Title
++   "No"  Nop
++   "Yes" Quit
+
+## Confirm suspend
+AddToMenu SuspendMenu "Really?" Title
++   "No"  Nop
++   "Yes" exec systemctl suspend
+
+
+
+## Internet and Surf menu
+AddToMenu SurfMenu
++   "Firefox"		exec firefox &
++   "Sylpheed"		exec sylpheed &
++   "Dillo"		exec dillo &
++   "Links2"		exec links2 -g &
+
+## Various utilities and applications menu
+AddToMenu UtilsMenu
++   "LeafPad"       exec leafpad &
++   "GNumeric"       exec gnumeric &
++   "Calendar"       exec orage &
++   "Calculator"       exec galculator &
+
+## Graphics programs menu
+AddToMenu GfxMenu
++	"Grafx2"		exec grafx2 &
++	"Pixcen"		exec wine64-stable ~/winapps/Pixcen.exe &
++	"SpritePad"		exec wine64-stable ~/winapps/Spritepad/SpritePad.exe &
++	"mtPaint"		exec mtpaint &
++	"Xfractint"		exec xfractint -font fixed -ctrlwindow &
+
+## Audio/video software menu
+AddToMenu MediaMenu
++   "Audacious"		exec audacious &
++   "VLC"		exec vlc &
++   "Gnome-MPV"		exec gnome-mpv &
++   "MilkyTracker"	exec milkytracker -nosplash &
++   "MikMod"		exec rxvt -fn "xft:Monospace:size=12" -title MikMod +sb -e mikmod &
+
+##### This is the root menu
+AddToMenu RootMenu "Root Menu"  Title
++	"Terminal"	exec wezterm &
++	""		Nop
++	"Internet"	Popup SurfMenu
++	"Graphics"	Popup GfxMenu
++	"Audio/Video"	Popup MediaMenu
++	"Applications"  Popup UtilsMenu
++	"System"	Popup SysMenu
+
